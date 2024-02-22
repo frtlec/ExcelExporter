@@ -1,0 +1,62 @@
+﻿@page "/counter"
+@using OfficeOpenXml;
+@using System.Xml;
+@inject IJSRuntime jsRuntime
+@using Microsoft.Extensions.DependencyInjection
+@inject TahtakaleIntegration tahtaKaleExporter
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="TahtaKaleExcelDownload">Tahta Kale</button>
+<button class="btn btn-primary" @onclick="GetDAta">Tahta GetAll</button>
+
+<script>
+    window.downloadFile = function (data, filename, type) {
+        var file = new Blob([data], { type: type });
+        if (window.navigator.msSaveOrOpenBlob) // IE10+
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else { // Others
+            var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+    }</script>
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    async Task GetDAta()
+    {
+        await tahtaKaleExporter.GetDataWithPaging(0,0);
+    }
+
+    async Task TahtaKaleExcelDownload()
+    {
+        try
+        {
+            byte[] excelBytes = await tahtaKaleExporter.GetExcelBytes();
+            await jsRuntime.InvokeVoidAsync("downloadFile", excelBytes, "products.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+}

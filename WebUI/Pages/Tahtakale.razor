@@ -1,0 +1,64 @@
+﻿@page "/tahtakale"
+@using BlazorBootstrap
+@using PSC.Blazor.Components.DataTable.Enums;
+@using System.Text.Encodings.Web;
+@using System.Web;
+@using PSC.Blazor.Components.ModalDialog
+@using WebUI.Shared.Components;
+@inject TahtakaleIntegration tahtakaleIntegration
+@inject IJSRuntime _jsRuntime
+
+<DataTable TModel="Item" Items="pagedForecasts.Data" Styles="TableStyle.Bordered" UsePaging="true" FetchData="DoFetchData" IsLoading="IsLoading"
+           PageCount="@pagedForecasts.Paging.PageCount" PageSize="@pagedForecasts.Paging.PageSize" IncludeHeaderFilters="true" IncludeSearchButton="true" IncludeAdvancedFilters="true">
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.Title" CustomTitle="Başlık" />
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.Barcode" CustomTitle="Barkode" />
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.ModelNumber" CustomTitle="Model Numarası" />
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.Price" CustomTitle="Fiyat" />
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.Quantity" CustomTitle="Stok" />
+    <DataTableColumn TModel="Item" IsSortable="true" MaxWidth="20" IsResizable="true" Property="(e) => e.Description" CustomTitle="Açıklama">
+        <RowTemplate Context="row">
+            <button class="btn btn-primary" @onclick="async ()=>await ShowDescriptionModal(row.Description)">Aç</button>
+            <Modal @ref="modal" />
+        </RowTemplate>
+
+    </DataTableColumn>
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="true" Property="(e) => e.CategoryTypeStr" CustomTitle="Kategori" />
+    <DataTableColumn TModel="Item" IsSortable="true" IsFilterable="false" Property="(e) => e.ProductTypeStr" CustomTitle="Ürün Tipi" />
+</DataTable>
+
+
+
+
+@code {
+    private bool IsLoading = true;
+    private bool firstFetch = true;
+
+    public bool DescriptionDialogOpen { get; set; }
+
+    private PagedResult<Item> pagedForecasts = new PagedResult<Item>(new List<Item>(), pageNumber: 1, pageSize: 50, 0);
+
+    private async Task DoFetchData(RequestArgs<Item> args)
+    {
+        IsLoading = true;
+
+        if (firstFetch)
+        {
+            pagedForecasts = await tahtakaleIntegration.SearchForecastAsync(null, 1000);
+            firstFetch = false;
+        }
+        else pagedForecasts = await tahtakaleIntegration.SearchForecastAsync(args, 1000);
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+    private Modal modal = default!;
+
+    private async Task ShowDescriptionModal(string description)
+    {
+        description=HttpUtility.HtmlDecode(description);
+        var parameters = new Dictionary<string, object>();
+        parameters.Add("Message", description);
+       
+        await modal.ShowAsync<ModalComponent>(title: "", parameters: parameters);
+    }
+}

@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="BlazorWebUI.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <HeadOutlet />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+    <script>
+        window.downloadFile = function (data, filename, type) {
+            var file = new Blob([data], { type: type });
+            if (window.navigator.msSaveOrOpenBlob) // IE10+
+                window.navigator.msSaveOrOpenBlob(file, filename);
+            else { // Others
+                var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        }
+        window.downloadImage = function (url, filename) {
+            console.log(url);
+            console.log(filename);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'blob';
+
+            if (xhr.status === 200) {
+                var blob = xhr.response;
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+         
+        };
+    </script>
+</body>
+
+</html>
