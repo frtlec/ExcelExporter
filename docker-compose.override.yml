@@ -5,14 +5,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=zk147olu
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=TestL.31235
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp1.pfx
       - DatabaseSettings:ConnectionString=mongodb://blazorwebdb:27020
     ports:
       - "5040:80"
       - "5042:443"
     volumes:
-      - ./https/aspnetapp.pfx:/https/aspnetapp.pfx:ro
+      - ./https/aspnetapp1.pfx:/https/aspnetapp1.pfx:ro
   blazorwebdb:
     container_name: blazorwebdb
     restart: always
