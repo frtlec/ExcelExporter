@@ -22,5 +22,4 @@ RUN dotnet publish "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN chmod 777 -R ../https
 ENTRYPOINT ["dotnet", "BlazorWebUI.dll"]
