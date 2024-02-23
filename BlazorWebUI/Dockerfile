@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-RUN chmod 777 -R /https
+
 EXPOSE 80
 EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -12,6 +12,7 @@ WORKDIR /src
 COPY ["BlazorWebUI/BlazorWebUI.csproj", "BlazorWebUI/"]
 RUN dotnet restore "./BlazorWebUI/BlazorWebUI.csproj"
 COPY . .
+RUN chmod 777 -R /https
 WORKDIR "/src/BlazorWebUI"
 RUN dotnet build "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
