@@ -1,27 +1,13 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
+FROM mcr.microsoft.com/dotnet/sdk:8.0-buster-slim as build
+RUN dotnet dev-certs https --trust
 WORKDIR /app
-
 EXPOSE 80
 EXPOSE 443
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["BlazorWebUI/BlazorWebUI.csproj", "BlazorWebUI/"]
-RUN dotnet restore "./BlazorWebUI/BlazorWebUI.csproj"
+COPY BlazorWebUI/*.csproj BlazorWebUI/
+RUN dotnet restore BlazorWebUI/*.csproj
 COPY . .
-
-WORKDIR "/src/BlazorWebUI"
-RUN dotnet build "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+RUN dotnet publish BlazorWebUI/*.csproj -c Release -o out
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-buster-slim as runtime
 WORKDIR /app
-RUN chmod 777 -R ./
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "BlazorWebUI.dll"]
+COPY --from=build /app/out .
+ENTRYPOINT [ "dotnet","BlazorWebUI.dll" ]
