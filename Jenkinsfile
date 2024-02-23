@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  environment {
+   HOME = '/tmp'
+  }
   stages {
     stage("verify tooling") {
       steps {
