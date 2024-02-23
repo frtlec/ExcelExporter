@@ -1,7 +1,9 @@
 pipeline {
   agent any
   environment {
-   HOME = '/tmp'
+    DISABLE_AUTH = 'true'
+    DB_ENGINE    = 'sqlite'
+    DOTNET_CLI_HOME = "/tmp/DOTNET_CLI_HOME"
   }
   stages {
     stage("verify tooling") {
