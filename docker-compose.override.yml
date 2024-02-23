@@ -12,7 +12,7 @@ services:
       - "5040:80"
       - "5042:443"
     volumes:
-      - ./https/:/https:ro
+      - ./https:/https:ro
   blazorwebdb:
     container_name: blazorwebdb
     restart: always
