@@ -1,0 +1,10 @@
+﻿<MudNavMenu Class="mud-width-full" Style="font-size:1.1rem" Dense="true" Color="Color.Dark">
+    <div class="text-center mb-5">
+        <MudIconButton Icon="@Icons.Custom.Uncategorized.Radioactive" Size="Size.Large" Color="Color.Warning" Href="/" Style="font-size:20rem" />
+    </div>
+    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+    <MudNavLink Href="/followed-products" Match="NavLinkMatch.Prefix">Ürünlerim</MudNavLink>
+    <MudNavGroup Title="Ürünler" Expanded="true">
+        <MudNavLink Href="/tahtakale" Match="NavLinkMatch.Prefix">Tahtakale</MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>

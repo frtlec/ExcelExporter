@@ -1,0 +1,205 @@
+﻿@page "/followed-products"
+@using BlazorWebUI.Databases.Mongo.DataModels
+@using BlazorWebUI.Models
+@using System.Web
+@using static BlazorWebUI.Models.FollowedProductDto
+
+
+@inject FollowedProductService _service;
+@inject StateContainer _stateContainer;
+
+<MudDataGrid T="SubItem"
+             ReadOnly="@_readOnly"
+             Items="@_stateContainer.FollowedProducts"
+             RowClass="highlightrow"
+             Breakpoint="Breakpoint.None"
+             DragDropColumnReordering="true"
+             Loading="@loading"
+             ColumnResizeMode="ResizeMode.Column"
+             StartedEditingItem="@StartedEditingItem"
+             CanceledEditingItem="@CanceledEditingItem"
+             CommittedItemChanges="@CommittedItemChanges"
+             EditTrigger="DataGridEditTrigger.OnRowClick"
+             EditMode="DataGridEditMode.Form"
+             SortMode="SortMode.Single"
+             FilterCaseSensitivity="DataGridFilterCaseSensitivity.Default"
+             FilterMode="DataGridFilterMode.Simple">
+    <Columns>
+        <HierarchyColumn T="SubItem" />
+        <TemplateColumn Title="Görsel" CellStyle="max-width:max-content; white-space: wrap;" Filterable="false">
+            <CellTemplate>
+                <MudImage Src="@context.Item.ImageLinks?.First()" Width="100" Elevation="1" Class="rounded-sm" />
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.Title" CellStyle="max-width: 130px; white-space: wrap;" Filterable="true" Title="Başlık" IsEditable="false" />
+        <PropertyColumn Property="x => x.TrendyolPrice" CellStyle="max-width: 130px; white-space: wrap;" Filterable="true" Title="Trenyol Fiyati" />
+        <PropertyColumn Property="x => x.TrendyolStock" CellStyle="max-width: 130px; white-space: wrap;" Filterable="true" Title="Trenyol Stok" />
+        <PropertyColumn Property="x => x.TrendyolLink" Title="Trenyol Link" Required="false">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudLink Href="@context.Item.TrendyolLink" Target="_blank">Git</MudLink>
+                </MudStack>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Barcode" CellStyle="max-width:20px !important;white-space: wrap;" Filterable="true" Title="Barkod" IsEditable="false" />
+        <PropertyColumn Property="x => x.ModelNo" Filterable="true" Title="Model" IsEditable="false" />
+        <PropertyColumn Property="x => x.Price" Filterable="true" Title="Fiyatı" IsEditable="false" />
+        <PropertyColumn Property="x => x.Stock" Filterable="true" Title="Stok" IsEditable="false" />
+        <PropertyColumn Property="x => x.SourceSite" Filterable="true" Title="Site" IsEditable="false" />
+        <TemplateColumn Title="Link" Filterable="false">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudLink Href="@context.Item.Link" Target="_blank">Git</MudLink>
+                </MudStack>
+            </CellTemplate>
+
+        </TemplateColumn>
+        <TemplateColumn Hidden="false" CellClass="justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudIconButton Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" OnClick="context.Actions.StartEditingItemAsync" />
+                </MudStack>
+
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Açıklama</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>@HttpUtility.HtmlDecode(context.Item.Description)</MudText>
+            </MudCardContent>
+        </MudCard>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Görsel</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            @foreach (var item in context.Item.ImageLinks)
+            {
+                <MudCardContent>
+                    <MudImage Src="@item" Elevation="25" Class="rounded-lg" />
+                </MudCardContent>
+            }
+
+        </MudCard>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Ürünün Tipi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>@HttpUtility.HtmlDecode(string.Join(',', context.Item.ProductTypes))</MudText>
+            </MudCardContent>
+        </MudCard>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Kategorisi</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>@HttpUtility.HtmlDecode(string.Join(',', context.Item.Categories))</MudText>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager PageSizeOptions=@(new int[] {500, 1000, 3000}) T="SubItem" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    private List<FollowedProductDto.SubItem> FollowedProductsList = new List<FollowedProductDto.SubItem>();
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+        _stateContainer.OnChange_Products += OnMyChangeHandler;
+        loading = false;
+    }
+    private bool _readOnly;
+    private bool _isCellEditMode;
+    private bool _editTriggerRowClick;
+    void StartedEditingItem(SubItem item)
+    {
+    }
+
+    void CanceledEditingItem(SubItem item)
+    {
+
+    }
+
+    async void CommittedItemChanges(SubItem item)
+    {
+        try
+        {
+            await _service.Update(new FollowedProductUpdate
+                {
+                    Id = item.Id,
+                    TrendyolLink = item.TrendyolLink,
+                    TrendyolPrice = item.TrendyolPrice,
+                    TrendyolStock = item.TrendyolStock
+                });
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+
+    }
+    private bool loading = true;
+    public async Task Load()
+    {
+        try
+        {
+            FollowedProductDto resp = await _service.GetAll();
+            _stateContainer.FollowedProducts = resp.Items;
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+    private Func<SubItem, string> _cellStyleFunc => x =>
+    {
+        string style = "";
+        switch (x.SourceSite)
+        {
+            case SourceSite.TAHTAKALE:
+                style += "background-color:#8CED8C";
+                break;
+        }
+        return style;
+    };
+
+
+    private async void UnFollow(string id)
+    {
+        await _service.Remove(id);
+        _stateContainer.FollowedProducts.Remove(_stateContainer.FollowedProducts.First(f => f.Id == id));
+        _stateContainer.OnChange_Products += OnMyChangeHandler;
+    }
+    private async void OnMyChangeHandler()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+    private async void OnMyChangeHandlerx()
+    {
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+}

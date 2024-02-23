@@ -1,30 +1,41 @@
 ﻿@page "/tahtakale"
 
 @using System.Net.Http.Json
+@using BlazorWebUI.Bussines
+@using BlazorWebUI.Models
 @using MudBlazor
 @using System.Web
 
 @rendermode InteractiveServer
 @inject TahtakaleIntegration tahtakaleIntegration
+@inject FollowedProductService _followeProductService;
 @inject IJSRuntime jsRuntime
-
+@inject ISnackbar Snackbar
+@inject StateContainer _stateContainer;
 @{
     int i = 0;
 }
 <div class="row text-right ">
     <div class="d-flex justify-content-end">
         <button class="btn btn-success" @onclick="ExcelExport">Excel Export</button>
-      </div>
+    </div>
 </div>
-<MudDataGrid Items="@Elements" Filterable="true" ColumnResizeMode="ResizeMode.Column" Bordered="true" SortMode="SortMode.None" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Default" FilterMode=" DataGridFilterMode.Simple">
+<MudDataGrid T="Item" Breakpoint="Breakpoint.Sm" @ref="mudDataGrid" MultiSelection="true" SelectedItems="@_selectedItems" SelectOnRowClick="true" Loading="@loading" SelectedItemsChanged="@SelectedItemsChanged"
+             Items="@Elements" DragDropColumnReordering="@_dragDropReorderingEnabled" Filterable="true" ColumnResizeMode="ResizeMode.Column" Bordered="true" SortMode="SortMode.None" FilterCaseSensitivity="DataGridFilterCaseSensitivity.Default" FilterMode=" DataGridFilterMode.Simple">
     <Columns>
+        <SelectColumn T="Item" />
         <HierarchyColumn T="Item" />
+        <TemplateColumn Title="Görsel" CellStyle="max-width: 100px; white-space: wrap;" Filterable="false">
+            <CellTemplate>
+                <MudImage Src="@context.Item.ImageLink" Width="100" Elevation="1" Class="rounded-sm" />
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.Title" CellStyle="max-width: 130px; white-space: wrap;" Filterable="true" Title="Başlık" />
         <PropertyColumn Property="x => x.Barcode" CellStyle="max-width:20px !important;white-space: wrap;" Filterable="true" Title="Barkod" />
         <PropertyColumn Property="x => x.ModelNumber" Filterable="true" Title="Model" />
         <PropertyColumn Property="x => x.Price" Filterable="true" Title="Fiyatı" />
         <PropertyColumn Property="x => x.Quantity" Filterable="true" Title="Stok" />
-        <TemplateColumn Title="Custom">
+        <TemplateColumn Title="Link">
             <CellTemplate>
                 <MudStack Row>
                     <MudLink Href="@context.Item.Link" Target="_blank">Siteye git</MudLink>
@@ -51,7 +62,7 @@
                 </CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudImage Src="@context.Item.ImageLink"  Elevation="25" Class="rounded-lg" />
+                <MudImage Src="@context.Item.ImageLink" Elevation="25" Class="rounded-lg" />
                 <MudImage Src="@context.Item.AdditionalImageLink1" Elevation="25" Class="rounded-lg" />
             </MudCardContent>
         </MudCard>
@@ -81,31 +92,77 @@
     </PagerContent>
 </MudDataGrid>
 @code {
+    private MudDataGrid<Item> mudDataGrid;
     private List<Item> Elements = new List<Item>();
     HashSet<Item> _selectedItems = new();
-    HashSet<Item> _filterItems = new();
-    FilterDefinition<Item> _filterDefinition;
-    bool _selectAll = true;
-    string _icon = Icons.Material.Outlined.FilterAlt;
-    bool _filterOpen = false;
+    bool loading = true;
+    bool _dragDropReorderingEnabled = true;
     protected override async Task OnInitializedAsync()
     {
+        _stateContainer.OnChange_Products += OnMyChangeHandler;
         TahtaKaleResponseDto resp = await tahtakaleIntegration.GetAll();
         Elements = resp.Datas;
-
+        _selectedItems = Elements.Where(f=>_stateContainer.FollowedProducts.Any(x=>x.ProductId.ToString()==f.Id)).ToHashSet();
+        loading = false;
+       
     }
     public async Task ExcelExport()
     {
         var excelBytes = await tahtakaleIntegration.GetExcelBytes();
         await jsRuntime.InvokeVoidAsync("downloadFile", excelBytes, "tahtakale-products.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
-    public async Task DownloadImage(string url)
-    {
-        await jsRuntime.InvokeVoidAsync("downloadImage", url, "image.jpg");
-    }
-    void OpenFilter()
-    {
-        _filterOpen = true;
-    }
+ 
 
+    async Task SelectedItemsChanged(HashSet<Item> items)
+    {
+        await RunAfterSelectedItems();
+
+    }
+    private async Task RunAfterSelectedItems()
+    {
+        try
+        {
+            var mapped = _selectedItems.Select(f => new FollowedProductAddDto
+                {
+                    Barcode = f.Barcode,
+                    ProductId = int.Parse(f.Id),
+                    SourceSite = Databases.Mongo.DataModels.SourceSite.TAHTAKALE
+                }).ToList();
+
+            await _followeProductService.RemoveAndAdd(mapped);
+            Snackbar.Add("Başarılı", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Başarısız", Severity.Error);
+        }
+        try
+        {
+            _stateContainer.FollowedProducts = (await _followeProductService.GetAll()).Items;
+            _stateContainer.OnChange_Products += OnMyChangeHandler;
+        }
+        catch
+        {
+            Snackbar.Add("Başarılı ancak uygulama güncellenemedi", Severity.Warning);
+        }
+       
+    }
+    private async void OnMyChangeHandler()
+    {
+  
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync( () =>
+        {
+            StateHasChanged();
+        });
+    }
+    private async void OnMyChangexHandler()
+    {
+
+        // InvokeAsync is inherited, it syncs the call back to the render thread
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
 }

@@ -1,8 +1,11 @@
-version: '3.4'
-
+version: "3.8"
 services:
   blazorwebui:
-    image: ${DOCKER_REGISTRY-}blazorwebui
+    image: blazorweb_ui
     build:
       context: .
       dockerfile: BlazorWebUI/Dockerfile
+  blazorwebdb:
+    image: mongo
+volumes:
+  blazorwebdb_volume:
