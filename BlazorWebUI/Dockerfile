@@ -11,4 +11,5 @@ RUN dotnet publish BlazorWebUI/*.csproj -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy as runtime
 WORKDIR /app
 COPY --from=build /app/out .
+RUN chmod 777 -R .
 ENTRYPOINT [ "dotnet","BlazorWebUI.dll" ]
