@@ -1,7 +1,7 @@
 version: "3.8"
 services:
-  blazorwebui:
-    image: blazorweb_ui
+  blazorwebuitest:
+    image: blazorwebuitest_ui
     build:
       context: .
       dockerfile: BlazorWebUI/Dockerfile
