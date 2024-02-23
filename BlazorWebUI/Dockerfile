@@ -1,7 +1,7 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER root
+USER ContainerAdministrator
 WORKDIR /app
 
 EXPOSE 80
@@ -12,6 +12,7 @@ WORKDIR /src
 COPY ["BlazorWebUI/BlazorWebUI.csproj", "BlazorWebUI/"]
 RUN dotnet restore "./BlazorWebUI/BlazorWebUI.csproj"
 COPY . .
+
 WORKDIR "/src/BlazorWebUI"
 RUN dotnet build "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -21,5 +22,6 @@ RUN dotnet publish "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 
 FROM base AS final
 WORKDIR /app
+RUN chmod 777 -R ./
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "BlazorWebUI.dll"]
