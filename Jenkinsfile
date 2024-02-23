@@ -22,10 +22,10 @@ pipeline {
     // }
     stage('Start container') {
       steps {
-        sh 'docker-compose down'
-        sh 'docker-compose build'
-        sh 'docker-compose up -d'
-        sh 'docker-compose ps'
+        sh 'sudo docker-compose down'
+        sh 'sudo docker-compose build'
+        sh 'sudo docker-compose up -d'
+        sh 'sudo docker-compose ps'
       }
     }
   }
