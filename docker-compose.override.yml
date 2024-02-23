@@ -10,6 +10,7 @@ services:
       - ASPNETCORE_HTTPS_PORT=19051
       - ASPNETCORE_Kestrel__Certificates__Default__Password=zk147olu
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - DatabaseSettings:ConnectionString=mongodb://blazorwebdb:27019
     ports:
       - "5040:80"
       - "5042:443"
@@ -19,6 +20,6 @@ services:
     container_name: blazorwebdb
     restart: always
     ports:
-      - "27018:27017"
+      - "27020:27017"
     volumes:
       - blazorwebdb_volume:/data/db
