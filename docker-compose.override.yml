@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   blazorwebuitest:
+    container_name: blazorwebuitest_ui
+    restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
@@ -11,6 +13,8 @@ services:
     ports:
       - "5040:80"
       - "5042:443"
+    depends_on:
+      - blazorwebdb
     volumes:
       - ./https/aspnetapp1.pfx:/https/aspnetapp1.pfx:ro
   blazorwebdb:
