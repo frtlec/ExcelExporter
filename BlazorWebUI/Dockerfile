@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-jammy as build
+RUN useradd -m jenkinsbuild
 RUN dotnet dev-certs https --trust
 WORKDIR /app
 EXPOSE 80
