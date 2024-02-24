@@ -16,7 +16,7 @@ RUN dotnet build "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p ${PASSWORD_ENV_SEEDED}
+RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p TestL.31235
 FROM base AS final
 WORKDIR /app
 COPY --chmod=0755 --from=build /https/* /https/
