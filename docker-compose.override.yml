@@ -10,8 +10,6 @@ services:
       - PASSWORD_ENV_SEEDED=TestL.31235
       - ASPNETCORE_Kestrel__Certificates__Default__Password=TestL.31235
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp123.pfx
-    args:
-      - PASSWORD_ENV_SEEDED=TestL.31235
     restart: unless-stopped
     ports:
       - 15005:443
