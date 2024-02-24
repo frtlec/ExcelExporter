@@ -7,8 +7,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - DatabaseSettings:ConnectionString=mongodb://blazorwebdb:27020
     ports:
-      - "5040:80"
-      - "5042:443"
+      - "6040:80"
     depends_on:
       - blazorwebdb
   blazorwebdb:
