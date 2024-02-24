@@ -4,7 +4,7 @@ services:
   blazorwebuitestx:
     container_name: blazorwebuitestx_ui
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - ASPNETCORE_HTTPS_PORT=19065
       - ASPNETCORE_Kestrel__Certificates__Default__Password=zk147olu
