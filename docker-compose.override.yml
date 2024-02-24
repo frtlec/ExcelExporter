@@ -11,6 +11,7 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     ports:
       - 19065:443
+      - 5123:80
     depends_on:
       - blazorwebdb
     volumes:
