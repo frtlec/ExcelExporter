@@ -19,7 +19,7 @@ RUN dotnet publish "./BlazorWebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 RUN dotnet dev-certs https -ep /https/aspnetapp.pfx -p TestL.31235
 FROM base AS final
 WORKDIR /app
-COPY --chmod=0755 --from=build /https/* /https/
+COPY --chmod=0755 --from=build ./https/* /https/
 COPY --from=publish /app/publish .
 
 ENTRYPOINT ["dotnet", "BlazorWebUI.dll"]
