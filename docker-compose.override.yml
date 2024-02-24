@@ -5,11 +5,15 @@ services:
     container_name: blazorwebuitest_ui
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
       - DatabaseSettings:ConnectionString=mongodb://blazorwebdb:27020
     ports:
-      - "6040:80"
+      - "5043:80"
+      - "5044:443"
     depends_on:
       - blazorwebdb
+    volumes:
+      - ./https/aspnetapp1.pfx:/https/aspnetapp1.pfx:ro
   blazorwebdb:
     container_name: blazorwebdb
     restart: always
